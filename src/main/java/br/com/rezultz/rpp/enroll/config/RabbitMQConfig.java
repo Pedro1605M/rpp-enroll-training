@@ -26,6 +26,21 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue participantQueueCreate() {
+        return new Queue(QUEUE_CREATE, true);
+    }
+
+    @Bean
+    public Queue participantQueueUpdate() {
+        return new Queue(QUEUE_UPDATE, true);
+    }
+
+    @Bean
+    public Queue participantQueueDelete() {
+        return new Queue(QUEUE_DELETE, true);
+    }
+
+    @Bean
     public Binding participantCreateBinding(DirectExchange participantExchange){
         return BindingBuilder.bind(participantQueueCreate()).to(participantExchange).with(ROUTING_KEY_CREATE);
     }
@@ -43,26 +58,6 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter messageConverter(){
         return new JacksonJsonMessageConverter();
-    }
-
-    @Bean
-    public Queue participantQueueCreate() {
-        return new Queue(QUEUE_CREATE, true);
-    }
-
-    @Bean
-    public Queue participantQueueUpdate() {
-        return new Queue(QUEUE_UPDATE, true);
-    }
-
-    @Bean
-    public Queue participantQueueDelete() {
-        return new Queue(QUEUE_DELETE, true);
-    }
-
-    @Bean
-    public Queue queueDelete() {
-        return new Queue(QUEUE_DELETE, true);
     }
 
 }
