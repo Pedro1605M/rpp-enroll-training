@@ -32,7 +32,7 @@ public class ParticipantRepositoryTest {
         participantCreateMessage = new ParticipantCreateMessage(
                 "Pedro Costa",
                 "Pedro Tech",
-                "12345678000129",
+                "12345678982",
                 "CPF",
                 "Empresa X"
         );

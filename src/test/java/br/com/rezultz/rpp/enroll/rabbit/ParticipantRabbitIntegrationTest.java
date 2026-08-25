@@ -25,7 +25,6 @@ public class ParticipantRabbitIntegrationTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        // Configuração do RabbitMQ Local
         registry.add("spring.rabbitmq.host", () -> "localhost");
         registry.add("spring.rabbitmq.port", () -> 5672);
         registry.add("spring.rabbitmq.username", () -> "guest");
@@ -51,7 +50,7 @@ public class ParticipantRabbitIntegrationTest {
     @Test
     @DisplayName("Deve disparar mensagem no RabbitMQ real e salvar o participante via Consumer")
     void shouldProcessParticipantCreateUntilEnd(){
-        String documento = "12345678900";
+        String documento = "123456789003333";
         ParticipantCreateMessage message = new ParticipantCreateMessage(
                 "Pedro Costa", "Pedro Tech", documento, "CPF", "Empresa X"
         );

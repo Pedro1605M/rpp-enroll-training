@@ -1,9 +1,9 @@
 package br.com.rezultz.rpp.enroll.service;
 
-import br.com.rezultz.rpp.enroll.entity.Participant;
 import br.com.rezultz.rpp.enroll.message.content.ParticipantCreateMessage;
-import br.com.rezultz.rpp.enroll.repository.ParticipantRepository;
+import br.com.rezultz.rpp.enroll.message.producer.ParticipantProducerRabbit;
 import br.com.rezultz.rpp.enroll.validator.ParticipantValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 
@@ -18,13 +19,40 @@ import static org.mockito.Mockito.*;
 class ParticipantServiceTest {
 
     @Mock
-    private ParticipantRepository participantRepository;
+    private ParticipantProducerRabbit participantProducerRabbit;
 
     @Mock
     private ParticipantValidator participantValidator;
 
     @InjectMocks
     private ParticipantService participantService;
+
+    private ParticipantCreateMessage participantCreateMessage;
+
+    @BeforeEach
+    void setUp() {
+        participantCreateMessage = new ParticipantCreateMessage(
+                "Pedro Costa", "Pedro Tech", "12345678900", "CPF", "Empresa X"
+        );
+    }
+
+    @Test
+    @DisplayName("Deve validar documento e enviar para o RabbitMQ com sucesso")
+    void shouldValidateAndSendToRabbitSuccessfully() {
+        participantService.create(participantCreateMessage);
+        verify(participantValidator, times(1)).validateDocumentDoesNotExist(participantCreateMessage.document());
+        verify(participantProducerRabbit, times(1)).sendCreateParticipant(participantCreateMessage);
+    }
+
+    @Test
+    @DisplayName("Não deve enviar para o RabbitMQ quando o documento já existir no banco")
+    void shouldNotSendToRabbitWhenDocumentAlreadyExists() {
+        doThrow(new IllegalArgumentException("Documento já cadastrado"))
+                .when(participantValidator).validateDocumentDoesNotExist(participantCreateMessage.document());
+        assertThrows(IllegalArgumentException.class, () -> participantService.create(participantCreateMessage));
+        verify(participantValidator, times(1)).validateDocumentDoesNotExist(participantCreateMessage.document());
+        verifyNoInteractions(participantProducerRabbit);
+    }
 
     @Test
     @DisplayName("Deve retornar uma página de participantes cadastrados com sucesso")
@@ -56,18 +84,7 @@ class ParticipantServiceTest {
 
     }
 
-    @Test
-    @DisplayName("Deve criar um novo participante com sucesso")
-    void shouldCreateParticipantWithSuccess() {
-        ParticipantCreateMessage participantCreateMessage = new ParticipantCreateMessage("pedro", "pedro tech2", "112334342", "cnpj", "empresa");
 
-        participantService.createRabbit(participantCreateMessage);
-
-        verify(participantValidator).validateDocumentDoesNotExist("112334342");
-        verify(participantRepository).save(any(Participant.class));
-
-
-    }
 
 }
 
